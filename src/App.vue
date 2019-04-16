@@ -6,11 +6,14 @@
       </v-toolbar-title>
     </v-toolbar>
 
-    <!-- TODO:  move the location input to its own component -->
+    <!--
+      TODO:  move the location input to its own component
+      "pac" is "Place AutoComplete"
+    -->
     <v-content>
       <v-container fluid>
         <v-layout row>
-            <v-flex xs9>
+            <v-flex xs5>
               <v-text-field
                 solo
                 label="Location"
@@ -41,12 +44,12 @@
 import Map from './components/Map'
 import { eventBus } from '@/event-bus.js';
 
-
 export default {
   name: 'App',
   components: {
     Map
   },
+
   data () {
     return {
       theLocation: '',
@@ -56,6 +59,8 @@ export default {
   },
 
   mounted: function() {
+
+    // targets for emitted events
     eventBus.$on('googleInit', () => {
       this.initMapAutocomplete();
     });
@@ -71,31 +76,29 @@ export default {
       this.theLocation = '';
     },
 
-    getGeoJSON() {
-
-    },
+    getGeoJSON() {},
 
     updateAddressFromMap(payload) {
+      // TODO: error checking...
       const firstAddress = payload[0].formatted_address;
-
 
       this.theLocation = firstAddress;
 
-      // parse the address to get city and state, so that
+      // TODO: parse the address to get city and state, so that
       // we have something to fetch our city boundaries with
     },
 
     initMapAutocomplete() {
       this.geocoder = new google.maps.Geocoder();
-      console.log(this.geocoder);
 
-      let input = document.getElementById('pac-input');
+      const input = document.getElementById('pac-input');
       const autocomplete = new google.maps.places.Autocomplete(input);
 
       google.maps.event.addListener(autocomplete, 'place_changed', () => {
         const place = autocomplete.getPlace();
 
-        console.log(place);
+        // we need to update the map
+        eventBus.$emit('newTextAddress', place);
       });
     }
   }
