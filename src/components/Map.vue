@@ -30,7 +30,7 @@ export default {
   },
 
   mounted: function() {
-    $Scriptjs("https://maps.googleapis.com/maps/api/js?key=AIzaSyDWWqCZv8lRlKKr_uPkthghOXDMstb6-Cg&libraries=geometry,places", () => {
+    $Scriptjs("https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=geometry,places", () => {
       this.initMap();
     });
 
