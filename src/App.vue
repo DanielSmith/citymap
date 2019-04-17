@@ -43,6 +43,7 @@
 <script>
 import Map from './components/Map'
 import { eventBus } from '@/event-bus.js';
+import axios from 'axios';
 
 export default {
   name: 'App',
@@ -56,7 +57,8 @@ export default {
       cityState: '',
 
       curPlace: null,
-      geocoder: null
+      geocoder: null,
+      myCityData: null
     }
   },
 
@@ -80,8 +82,7 @@ export default {
     },
 
     getGeoJSON() {
-      console.log('get city');
-      console.log(this.cityState);
+      this.getCityData(this.cityState);
     },
 
 
@@ -112,6 +113,48 @@ export default {
       });
       return cs;
     },
+
+    getCityData(theCity) {
+
+      let apiPath = "https://nominatim.openstreetmap.org/search.php";
+
+      let params = {
+        q: theCity,
+        polygon_geojson: 1,
+        format: "json"
+      };
+
+      axios.get(apiPath, { params: params }  )
+        .then(response => {
+          let geoJSONDataChunk = response.data[0];
+
+
+          // geojson data from http://nominatim.openstreetmap.org/ needs
+          // to be wrapped, so that the google addGeoJson() call
+          // can handle it properly
+          const geoConf = {
+            "type": "FeatureCollection",
+            "features": [
+              { "type": "Feature",
+                "geometry": geoJSONDataChunk.geojson,
+                "id": "city"
+              }
+            ]
+          };
+
+          this.myCityData = new google.maps.Data();
+          this.myCityData.addGeoJson(geoConf, "city");
+          this.myCityData.setStyle({
+            fillColor: 'green',
+            fillOpacity: 0.1,
+            strokeWeight: 1
+          });
+
+          // send data to our Map component
+          eventBus.$emit('sendCityData', this.myCityData);
+        })
+    },
+
 
     updateAddressFromMap(payload) {
       // TODO: error checking...

@@ -30,12 +30,16 @@ export default {
   },
 
   mounted: function() {
-    $Scriptjs("https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY-Cg&libraries=geometry,places", () => {
+    $Scriptjs("https://maps.googleapis.com/maps/api/js?key=AIzaSyDWWqCZv8lRlKKr_uPkthghOXDMstb6-Cg&libraries=geometry,places", () => {
       this.initMap();
     });
 
     eventBus.$on('newTextAddress', (payload) => {
       this.updateFromTextAddress(payload);
+    });
+
+    eventBus.$on('sendCityData', (payload) => {
+      this.renderCityMap(payload);
     })
   },
 
@@ -83,6 +87,15 @@ export default {
       }
 
       this.marker.setPosition(latLng);
+    },
+
+    renderCityMap(myCityData) {
+      myCityData.setMap(this.map);
+
+      // and pass clicks on to the underlying map
+      myCityData.addListener('click', (event) => {
+        google.maps.event.trigger(this.map, 'click', event);
+      });
     }
   }
 }
