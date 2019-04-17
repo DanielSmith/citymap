@@ -29,13 +29,23 @@ export default {
     }
   },
 
-  mounted() {
-    $Scriptjs("https://maps.googleapis.com/maps/api/js?key=AIzaSyBq4sydOK1dxIFjwITRJNp2rBq9hTBid4I&libraries=geometry,places", () => {
+  mounted: function() {
+    $Scriptjs("https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY-Cg&libraries=geometry,places", () => {
       this.initMap();
     });
+
+    eventBus.$on('newTextAddress', (payload) => {
+      this.updateFromTextAddress(payload);
+    })
   },
 
   methods: {
+    updateFromTextAddress(payload) {
+      this.map.setCenter(payload.geometry.location);
+      this.updateMarker(payload.geometry.location);
+    },
+
+
     initMap() {
       this.geocoder = new google.maps.Geocoder();
 
@@ -55,15 +65,9 @@ export default {
         this.updateMarker(event.latLng);
 
         this.geocoder.geocode({'location': event.latLng}, (results, status) => {
-          console.log(results);
-
           const firstAddress = results[0].formatted_address;
-          console.log(firstAddress);
-
-
           eventBus.$emit('mapAddress', results);
         });
-
       });
 
       // now we can init other things that depend on Google being loaded
@@ -87,7 +91,7 @@ export default {
 <style>
 #map {
   width: 90vw;
-  height: 90vw;
+  height: 50vw;
 }
 </style>
 
@@ -96,3 +100,4 @@ export default {
 
 
 
+ 

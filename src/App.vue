@@ -25,7 +25,7 @@
               >
               </v-text-field>
             </v-flex>
-            <v-btn
+            <v-btn v-if="curPlace"
               color="green"
               @click="getGeoJSON"
             >
@@ -53,7 +53,9 @@ export default {
   data () {
     return {
       theLocation: '',
+      cityState: '',
 
+      curPlace: null,
       geocoder: null
     }
   },
@@ -74,18 +76,53 @@ export default {
 
     doClearLocation() {
       this.theLocation = '';
+      this.curPlace = '';
     },
 
-    getGeoJSON() {},
+    getGeoJSON() {
+      console.log('get city');
+      console.log(this.cityState);
+    },
+
+
+    cityStateHelper(str) {
+      let city = '';
+      let state = '';
+
+      if (!str) return '';
+
+      const addressParts = str.split(',');
+      city = addressParts[0];
+      // just the first two characters...
+      state = addressParts[1].trim().substring(0,2);
+      return `${city},${state}`;
+    },
+
+    getCityState(address) {
+      let cs = '';
+
+      // this is not foolproof.. do a deep dive into the address components
+      // and their type, if you are going to be more thorough.. I am just
+      // working off of the formatted address
+      // more info at https://developers.google.com/maps/documentation/geocoding/start?csw=1
+      address.map(curAddress => {        
+        if (curAddress.types[0] === "locality") {
+          cs = this.cityStateHelper(curAddress.formatted_address);
+        }
+      });
+      return cs;
+    },
 
     updateAddressFromMap(payload) {
       // TODO: error checking...
       const firstAddress = payload[0].formatted_address;
 
       this.theLocation = firstAddress;
+      // if we have something here, it makes the 'get city' button visible
+      this.curPlace = this.theLocation;
 
-      // TODO: parse the address to get city and state, so that
-      // we have something to fetch our city boundaries with
+      // parse the address to get city and state
+      this.cityState = this.getCityState(payload);
     },
 
     initMapAutocomplete() {
@@ -95,10 +132,16 @@ export default {
       const autocomplete = new google.maps.places.Autocomplete(input);
 
       google.maps.event.addListener(autocomplete, 'place_changed', () => {
-        const place = autocomplete.getPlace();
+        this.curPlace = autocomplete.getPlace();
+        this.theLocation = this.curPlace.formatted_address;
 
-        // we need to update the map
-        eventBus.$emit('newTextAddress', place);
+        if (typeof this.curPlace.formatted_address !== "undefined") {          
+          // parse the address to get city and state
+          this.cityState = this.cityStateHelper(this.curPlace.formatted_address);
+
+          // we need to update the map
+          eventBus.$emit('newTextAddress', this.curPlace);
+        }
       });
     }
   }
