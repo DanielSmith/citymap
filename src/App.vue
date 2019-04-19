@@ -31,6 +31,24 @@
             >
               Get City
             </v-btn>
+
+            <v-flex xs3>
+              <v-text-field
+                solo
+                label="Keywords"
+                placeholder=" "
+                v-model="theKeyword"
+                id="ps-input"
+              >
+              </v-text-field>
+            </v-flex>
+            
+            <v-btn
+              color="green"
+              @click.stop="launchPlacesSearch"
+            >
+              Search
+            </v-btn>
         </v-layout>
 
         <Map/>
@@ -54,6 +72,7 @@ export default {
   data () {
     return {
       theLocation: '',
+      theKeyword: '',
       cityState: '',
 
       curPlace: null,
@@ -75,6 +94,11 @@ export default {
   },
 
   methods: {
+
+    // toss this over to the Map component
+    launchPlacesSearch() {
+      eventBus.$emit('launchKeywordSearch', this.theKeyword)
+    },
 
     doClearLocation() {
       this.theLocation = '';
