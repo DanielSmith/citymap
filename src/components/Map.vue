@@ -10,7 +10,6 @@
 import $Scriptjs from 'scriptjs';
 import { eventBus } from '@/event-bus.js';
 
-
 export default {
   name: "Map",
 
@@ -46,8 +45,6 @@ export default {
     });
 
     eventBus.$on('sendCityData', (payload) => {
-      console.dir(payload);
-
       this.renderCityMap(payload.coordinates);
       this.setDataLayer(payload.multiPoly, payload.numGeometries);
     })
@@ -68,9 +65,6 @@ export default {
     },
 
     setDataLayer(googleGeometryMultiPoly, numGeometries) {
-      console.dir(googleGeometryMultiPoly);
-      console.log(numGeometries);
-
       this.mapGoogleGeometryMultiPoly = googleGeometryMultiPoly;
       this.mapNumGeometries = numGeometries;
     },
