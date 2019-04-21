@@ -145,11 +145,14 @@ export default {
 
       let apiPath = "https://nominatim.openstreetmap.org/search.php";
 
+
       let params = {
-        q: theCity,
+        q: `${theCity},USA`,
         polygon_geojson: 1,
         format: "json"
       };
+
+      console.log(params);
 
       let polygonType = null;
 
@@ -241,6 +244,8 @@ export default {
     getCityIndex(data) {
       let retIndex = null;
       let adminIndex = null;
+
+      console.log(data);
 
       data.map((curData, index) => {
         // console.log(curData.type);
