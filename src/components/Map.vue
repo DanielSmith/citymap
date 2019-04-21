@@ -37,9 +37,7 @@ export default {
 
   mounted: function() {
     // use your own key...
-    $Scriptjs("https://maps.googleapis.com/maps/api/js?key=AIzaSyBRQ77UhlR8twR6gDgMcGDvhOEOg2dc7tk&libraries=geometry,places", () => {
-
-    // $Scriptjs("https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=geometry,places", () => {
+    $Scriptjs("https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=geometry,places", () => {
       this.initMap();
     });
 
