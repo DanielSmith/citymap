@@ -28,13 +28,18 @@ export default {
       DEFAULT_LNG: -73.974,
 
       geocoder: null,
-      placesService: null
+      placesService: null,
+
+      mapGoogleGeometryMultiPoly: null,
+      mapNumGeometries: 0
     }
   },
 
   mounted: function() {
     // use your own key...
-    $Scriptjs("https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=geometry,places", () => {
+    $Scriptjs("https://maps.googleapis.com/maps/api/js?key=AIzaSyBRQ77UhlR8twR6gDgMcGDvhOEOg2dc7tk&libraries=geometry,places", () => {
+
+    // $Scriptjs("https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=geometry,places", () => {
       this.initMap();
     });
 
@@ -43,7 +48,10 @@ export default {
     });
 
     eventBus.$on('sendCityData', (payload) => {
-      this.renderCityMap(payload);
+      console.dir(payload);
+
+      this.renderCityMap(payload.coordinates);
+      this.setDataLayer(payload.multiPoly, payload.numGeometries);
     })
 
     eventBus.$on('launchKeywordSearch', (payload) => {
@@ -59,6 +67,14 @@ export default {
           resolve()
         }, timeout)
       })
+    },
+
+    setDataLayer(googleGeometryMultiPoly, numGeometries) {
+      console.dir(googleGeometryMultiPoly);
+      console.log(numGeometries);
+
+      this.mapGoogleGeometryMultiPoly = googleGeometryMultiPoly;
+      this.mapNumGeometries = numGeometries;
     },
 
 
@@ -123,7 +139,24 @@ export default {
     },
 
     searchResultMarkers(results) {
-      results.map((place) => {
+      // if we have not pulled in City Boundaries, this is our default
+      let filteredresults = results;
+
+      if (this.mapNumGeometries > 0 && this.mapGoogleGeometryMultiPoly) {
+        filteredresults = [];
+
+        results.map((curPlace) => {          
+          for (let i = 0; i < this.mapNumGeometries; i++) {
+            if (google.maps.geometry.poly.containsLocation(
+              curPlace.geometry.location,
+              this.mapGoogleGeometryMultiPoly [i]) == true) {
+                filteredresults.push(curPlace);
+            }
+          }
+        });
+      }
+
+      filteredresults.map((place) => {
         let image = {
           url: place.icon,
           size: new google.maps.Size(71, 71),
@@ -175,6 +208,9 @@ export default {
     },
 
     googlePlacesSearch(keyword, radius = 1000) {
+
+      if (!keyword.trim()) return;
+
       let params = {
         location: new google.maps.LatLng(this.lastLat, this.lastLng),
         radius: radius,

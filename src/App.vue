@@ -47,7 +47,7 @@
               color="green"
               @click.stop="launchPlacesSearch"
             >
-              Search
+               Search
             </v-btn>
         </v-layout>
 
@@ -77,7 +77,10 @@ export default {
 
       curPlace: null,
       geocoder: null,
-      myCityData: null
+      myCityData: null,
+
+      googleGeometryMultiPoly: [],
+      numGeometries: 0
     }
   },
 
@@ -148,10 +151,14 @@ export default {
         format: "json"
       };
 
+      let polygonType = null;
+
       axios.get(apiPath, { params: params }  )
         .then(response => {
-          let geoJSONDataChunk = response.data[0];
+          let responseIndex = this.getCityIndex(response.data);
+          let geoJSONDataChunk = response.data[responseIndex];
 
+          polygonType = geoJSONDataChunk.geojson.type || null;
 
           // geojson data from http://nominatim.openstreetmap.org/ needs
           // to be wrapped, so that the google addGeoJson() call
@@ -174,11 +181,88 @@ export default {
             strokeWeight: 1
           });
 
-          // send data to our Map component
-          eventBus.$emit('sendCityData', this.myCityData);
-        })
+          // we want to get geometry into our local objects, and create
+          // google geometry objects with it.. hence the naming...  
+          let localCity = this.myCityData.getFeatureById('city');
+          let allLocalMultiPolys = [];
+          let localGeometry = null;
+
+          // if a Polygon, our coordinates are at coordinates[0]
+          // if a MultiPolygon, we loop through coordinates[0]...coordinates[n]
+          if (polygonType === 'Polygon') {
+            localGeometry = localCity.getGeometry();
+            let numArrays = localGeometry.getLength();
+  
+            allLocalMultiPolys[0] = [];
+
+            for (let i = 0; i < numArrays; i++) {
+              allLocalMultiPolys[0].push(localGeometry.getAt(i).getArray());
+            }
+  
+            this.googleGeometryMultiPoly[0] = new google.maps.Polygon({
+              paths: allLocalMultiPolys[0]
+            })
+
+            this.numGeometries = 1;
+
+          } else {
+            localGeometry = localCity.getGeometry();
+            let localGeometryArray = localCity.getGeometry().getArray();
+
+            localGeometryArray.map((item, i) => {
+              allLocalMultiPolys[i] = [];
+              let curPolyNum = item.getLength();
+              for (let j = 0; j < curPolyNum; j++) {
+                allLocalMultiPolys[i].push(item.getAt(j).getArray());
+              }
+              this.googleGeometryMultiPoly[i] = [];
+              this.googleGeometryMultiPoly[i] = new google.maps.Polygon({
+                paths: allLocalMultiPolys[i]
+              });
+            });
+
+            this.numGeometries = localGeometry.getLength();
+          }
+
+          // send boundary geometry and polygon data to our Map component
+          eventBus.$emit('sendCityData', {
+            coordinates: this.myCityData,
+            multiPoly: this.googleGeometryMultiPoly,
+            numGeometries: this.numGeometries
+          });
+        });
     },
 
+
+    /*
+    ** getCityIndex -  figure out which chunk of data contains city boundaries,
+    ** or punt to administrative (we cant assume that data[0]
+    */
+    getCityIndex(data) {
+      let retIndex = null;
+      let adminIndex = null;
+
+      data.map((curData, index) => {
+        // console.log(curData.type);
+        switch(curData.type) {
+          case "city":
+            retIndex = index;
+            break;
+          case "administrative":
+            adminIndex = index;
+            break;
+          default:
+            break;
+        }
+      });
+
+      // ... we punt to administrative...
+      if (retIndex === null && adminIndex !== null) {
+        retIndex = adminIndex;
+      }
+
+      return retIndex;
+    },
 
     updateAddressFromMap(payload) {
       // TODO: error checking...
