@@ -31,7 +31,7 @@ See more about this in [Location, Location, Location (Part 2)](https://medium.co
 
 * Vue cli
 
-* The instructions in [Part 1: Set up Vue.js + Google Maps](https://medium.com/@javajoint/how-to-map-cities-with-vue-geojson-and-google-part-1-617d3eb796e0)
+* The instructions in [Set up Vue.js + Google Maps (Part 1)](https://medium.com/@javajoint/how-to-map-cities-with-vue-geojson-and-google-part-1-617d3eb796e0)
 
 
 ### Customize configuration
