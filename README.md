@@ -20,20 +20,18 @@ I recently wrote a 5 part series that shows how to do mapping, and searching whi
 
 You can get to the articles via this [box set page](https://medium.com/@javajoint/how-to-map-cities-with-vue-geojson-and-google-box-set-7d9afd486070)
 
-## Project setup
-```
-npm install
-```
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+## Prerequisites
 
-### Compiles and minifies for production
-```
-npm run build
-```
+* Google API account set up.   You will be generating an API key for four access to four APIs: Geocoding, Geolocation, Maps, and Places:
+
+![image](https://cdn-images-1.medium.com/max/800/1*X34nreXWo-Hd-aWAOpolfA.png)
+
+See more about this in [Location, Location, Location (Part 2)](https://medium.com/@javajoint/how-to-map-cities-with-vue-geojson-and-google-part-2-9b8bdf540b96)
+
+* Vue cli
+
+* The instructions in [Part 1: Set up Vue.js + Google Maps](https://medium.com/@javajoint/how-to-map-cities-with-vue-geojson-and-google-part-1-617d3eb796e0)
 
 
 ### Customize configuration
