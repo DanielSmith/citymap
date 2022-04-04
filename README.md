@@ -42,7 +42,7 @@ I wrote this quickly, along with the articles that go with it.  I have some insi
 
 * better layout of Vue.js components - dont depend on App.vue for so much
 * needs better error checking
-* there is no notion of cleaning up data structures when going betweeen cities - this could chew up memory quickly
+* there is no notion of cleaning up data structures when going between cities - this could chew up memory quickly
 * the method of finding the correct element in GeoJSON is not quite there.  I should look further for a Polygon or Multipolygon in some cases
 * configuration data (specifically API keys) should be stored in an external file
 * could make better use of Vuetify - this example is a bit ugly
